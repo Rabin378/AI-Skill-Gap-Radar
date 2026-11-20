@@ -1,0 +1,597 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Which data and AI skills the job market rewards, and how your own levels compare.">
+  <title>Skill Radar</title>
+  <style>
+    :root {
+      --paper: #eef1ec;
+      --ink: #1c2630;
+      --muted: #56646c;
+      --rule: #c5cdc8;
+      --market: #1d6b67;
+      --market-soft: #d4e6e3;
+      --you: #b9802a;
+      --down: #a4492f;
+      --serif: Charter, "Bitstream Charter", "Iowan Old Style", "Sitka Text", Cambria, Georgia, serif;
+      --sans: "Avenir Next", "Helvetica Neue", "Segoe UI", system-ui, -apple-system, sans-serif;
+      --ease: cubic-bezier(0.2, 0.7, 0.2, 1);
+    }
+    * { box-sizing: border-box; }
+    html { -webkit-text-size-adjust: 100%; }
+    body { margin: 0; background: var(--paper); color: var(--ink); font: 17px/1.6 var(--sans); }
+    .page { max-width: 1120px; margin: 0 auto; padding: 56px 24px 72px; }
+    :focus-visible { outline: 2px solid var(--market); outline-offset: 3px; border-radius: 2px; }
+    h1, h2, h3 { font-family: var(--serif); letter-spacing: -0.01em; margin: 0; }
+    h1 { font-weight: 700; font-size: clamp(36px, 5vw, 56px); line-height: 1.08; margin-bottom: 20px; }
+    h2 { font-weight: 600; font-size: 30px; line-height: 1.2; margin-bottom: 8px; }
+    p { margin: 0; }
+    .muted, .lede, .section-intro { color: var(--muted); }
+    .lede { font-size: 19px; max-width: 34em; margin-top: 16px; }
+    .answer { font-size: 19px; max-width: 34em; }
+    .answer strong { color: var(--market); font-weight: 700; }
+
+    .hero { display: grid; grid-template-columns: minmax(0, 0.92fr) minmax(0, 1.08fr); gap: 40px; align-items: center; }
+    .radar { margin: 0; }
+    .radar svg { width: 100%; height: auto; display: block; overflow: visible; }
+    .radar-label { font: 500 20px var(--sans); fill: var(--ink); }
+    .ring, .spoke { fill: none; stroke: var(--rule); stroke-width: 1; }
+    .market-shape { fill: var(--market); fill-opacity: 0.16; stroke: var(--market); stroke-width: 2.5; stroke-linejoin: round; }
+    .you-shape { fill: var(--you); fill-opacity: 0.18; stroke: var(--you); stroke-width: 2; stroke-dasharray: 6 5; stroke-linejoin: round; }
+    .legend { display: flex; gap: 18px; justify-content: center; font-size: 14px; color: var(--muted); margin-top: 8px; }
+    .swatch { display: inline-block; width: 18px; height: 4px; border-radius: 2px; vertical-align: middle; margin-right: 8px; }
+    .swatch.market { background: var(--market); }
+    .swatch.you { background: var(--you); }
+
+    .split { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr); gap: 56px; margin-top: 72px; }
+    section.block { margin-top: 72px; padding-top: 28px; border-top: 1px solid var(--rule); }
+
+    .levels { border-top: 1px solid var(--rule); }
+    .level-row { display: grid; grid-template-columns: 1fr auto; gap: 2px 16px; padding: 14px 0 12px; border-bottom: 1px solid var(--rule); }
+    .level-row label { font-weight: 600; }
+    .level-row output { font-variant-numeric: tabular-nums; color: var(--muted); font-size: 15px; }
+    .level-row input { grid-column: 1 / -1; width: 100%; margin: 6px 0 0; accent-color: var(--market); }
+
+    .picks { list-style: none; margin: 0; padding: 0; }
+    .pick { display: grid; grid-template-columns: 52px minmax(0, 1fr); gap: 4px 14px; padding: 20px 0; border-top: 1px solid var(--rule); }
+    .pick:first-child { border-top: 0; padding-top: 0; }
+    .rank { font: 500 32px/1 var(--serif); color: var(--muted); }
+    .pick h3 { font-size: 22px; font-weight: 600; margin-bottom: 4px; }
+    .pick .reason { color: var(--muted); font-size: 15px; }
+    .pick .level-note { display: block; margin-top: 8px; color: var(--muted); font-size: 14px; }
+    .meter { display: block; height: 6px; border-radius: 999px; background: var(--market-soft); overflow: hidden; max-width: 340px; }
+    .meter > span { display: block; height: 100%; width: 0; background: var(--market); transition: width 0.8s var(--ease); }
+    .pick .meter { margin-top: 10px; }
+
+    .table-wrap { overflow-x: auto; border-top: 1px solid var(--rule); }
+    table { width: 100%; min-width: 680px; border-collapse: collapse; font-variant-numeric: tabular-nums; }
+    caption { text-align: left; color: var(--muted); font-size: 14px; padding: 14px 0 10px; }
+    th, td { padding: 14px 12px 14px 0; border-bottom: 1px solid var(--rule); text-align: left; vertical-align: middle; }
+    th { font-size: 14px; color: var(--muted); font-weight: 600; }
+    th.num, td.num { text-align: right; padding-right: 16px; }
+    .value { display: flex; align-items: center; gap: 12px; }
+    .value .meter { width: 150px; flex: 0 0 150px; }
+    .value b { font-weight: 600; min-width: 3.2em; }
+    .up { color: var(--market); font-weight: 600; }
+    .down { color: var(--down); font-weight: 600; }
+    .dots { display: inline-flex; gap: 4px; }
+    .dots i { width: 10px; height: 10px; border-radius: 50%; border: 1.5px solid var(--you); }
+    .dots i.on { background: var(--you); }
+
+    .reading { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 36px 56px; }
+    .reading h3 { font-size: 19px; font-weight: 600; margin-bottom: 8px; }
+    .reading p { color: var(--muted); font-size: 16px; }
+
+    footer { margin-top: 64px; padding-top: 22px; border-top: 1px solid var(--rule); font-size: 14px; color: var(--muted); }
+
+    .rise { animation: rise 0.8s var(--ease) both; animation-delay: var(--d, 0ms); }
+    @keyframes rise { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+
+    @media (max-width: 860px) {
+      .hero, .split { grid-template-columns: 1fr; gap: 40px; }
+      .split { margin-top: 56px; }
+      .reading { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 520px) {
+      .page { padding: 36px 18px 56px; }
+      h1 { font-size: 34px; }
+      .radar-label { font-size: 24px; }
+      .rank { font-size: 26px; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation: none !important; transition: none !important; }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <header class="hero">
+      <div class="hero-text">
+        <h1 id="headline" class="rise" style="--d: 0ms">Loading your radar</h1>
+        <p class="answer rise" style="--d: 90ms" aria-live="polite">
+          Your current skills cover about <strong id="coverage">0%</strong> of the market value in these <span id="postings">0</span> postings. <span id="band"></span>
+        </p>
+        <p class="lede rise" style="--d: 170ms">Move the sliders to set your levels. The radar, your coverage, and the learn-next list update as you go.</p>
+      </div>
+      <figure class="radar rise" style="--d: 120ms">
+        <svg id="radar" viewBox="0 0 760 560" role="img" aria-labelledby="radar-title radar-desc">
+          <title id="radar-title">Market value compared with your skill levels</title>
+          <desc id="radar-desc">Radar chart of the top skills by market value, with your levels overlaid.</desc>
+          <g id="rings"></g>
+          <g id="spokes"></g>
+          <polygon id="market-shape" class="market-shape" points=""></polygon>
+          <polygon id="you-shape" class="you-shape" points=""></polygon>
+          <g id="labels"></g>
+        </svg>
+        <figcaption class="legend">
+          <span><span class="swatch market"></span>Market value</span>
+          <span><span class="swatch you"></span>Your level</span>
+        </figcaption>
+      </figure>
+    </header>
+
+    <div class="split">
+      <section aria-labelledby="levels-heading" class="rise" style="--d: 220ms">
+        <h2 id="levels-heading">Your levels</h2>
+        <p class="section-intro">0 means not started. 5 means you can teach it or lead decisions about it.</p>
+        <div id="levels" class="levels"></div>
+      </section>
+
+      <section aria-labelledby="picks-heading" class="rise" style="--d: 300ms">
+        <h2 id="picks-heading">Learn next</h2>
+        <p class="section-intro">The skills that would unlock the most market value for your profile, in order.</p>
+        <ol id="picks" class="picks"></ol>
+        <p id="picks-empty" class="section-intro" hidden>Your current skills already cover the strongest opportunities.</p>
+      </section>
+    </div>
+
+    <section class="block" aria-labelledby="market-heading">
+      <h2 id="market-heading">Where the market value is</h2>
+      <p class="section-intro">Projected market value for the leading skills, with posting counts and salary midpoints from the postings.</p>
+      <div class="table-wrap" tabindex="0">
+        <table>
+          <caption id="table-caption"></caption>
+          <thead>
+            <tr>
+              <th scope="col">Skill</th>
+              <th scope="col">Market value</th>
+              <th scope="col" class="num">Postings</th>
+              <th scope="col" class="num">Average salary</th>
+              <th scope="col" class="num">Past 12 months</th>
+              <th scope="col">Your level</th>
+            </tr>
+          </thead>
+          <tbody id="table-body"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="block" aria-labelledby="reading-heading">
+      <h2 id="reading-heading">How to read this</h2>
+      <p class="section-intro">Three signals drive the market value. Each one is scaled to 0 to 100 before it is combined.</p>
+      <div class="reading">
+        <div>
+          <h3>Market value</h3>
+          <p>Demand (45%) counts how often postings list a skill. Salary (35%) uses the midpoint of posted ranges. Growth (20%) uses the trend index and the 12-month change. The blend is then adjusted by the 12-month change.</p>
+        </div>
+        <div>
+          <h3>Coverage and gap</h3>
+          <p>Coverage is the share of market value your levels already reach. The gap is the rest. Each skill counts in proportion to its market value and to how far you still have to go.</p>
+        </div>
+        <div>
+          <h3>Learn next</h3>
+          <p>The list ranks skills by how much value each would unlock for you right now. It re-ranks as you change your levels, so you can test a plan before committing to it.</p>
+        </div>
+        <div>
+          <h3>What the numbers are not</h3>
+          <p>They describe the postings you gave the tool, not every job in the market. The trend figures in the sample data are synthetic demo values.</p>
+        </div>
+      </div>
+    </section>
+
+    <footer>
+      <p id="footnote"></p>
+    </footer>
+  </main>
+
+  <script type="application/json" id="skill-data">{"postings": 20, "profile": ["Python", "GenAI", "SQL", "LLM", "MLOps", "Cloud", "Machine Learning", "Kubernetes", "APIs", "Spark", "Docker", "Product Analytics", "Statistics", "Power BI", "Excel"], "skills": [{"avgSalary": 164133.33333333334, "change": 14.0, "level": 4.0, "postings": 15, "projected": 97.17484497917631, "reason": "Listed in 15 of 20 postings. Average salary midpoint is $164,133. Trend is +14% over the past 12 months.", "skill": "Python"}, {"avgSalary": 164500.0, "change": 34.0, "level": 1.0, "postings": 5, "projected": 79.9224490513651, "reason": "Listed in 5 of 20 postings. Average salary midpoint is $164,500. Trend is +34% over the past 12 months.", "skill": "GenAI"}, {"avgSalary": 137107.14285714287, "change": 12.0, "level": 3.0, "postings": 14, "projected": 79.44806293382695, "reason": "Listed in 14 of 20 postings. Average salary midpoint is $137,107. Trend is +12% over the past 12 months.", "skill": "SQL"}, {"avgSalary": 175833.33333333334, "change": 31.0, "level": 0.0, "postings": 3, "projected": 75.04857242017584, "reason": "Listed in 3 of 20 postings. Average salary midpoint is $175,833. Trend is +31% over the past 12 months.", "skill": "LLM"}, {"avgSalary": 186666.66666666666, "change": 24.0, "level": 0.0, "postings": 3, "projected": 73.3336, "reason": "Listed in 3 of 20 postings. Average salary midpoint is $186,667. Trend is +24% over the past 12 months.", "skill": "MLOps"}, {"avgSalary": 173800.0, "change": 20.0, "level": 0.0, "postings": 5, "projected": 71.03833410458121, "reason": "Listed in 5 of 20 postings. Average salary midpoint is $173,800. Trend is +20% over the past 12 months.", "skill": "Cloud"}, {"avgSalary": 165666.66666666666, "change": 18.0, "level": 1.0, "postings": 6, "projected": 70.0177926885701, "reason": "Listed in 6 of 20 postings. Average salary midpoint is $165,667. Trend is +18% over the past 12 months.", "skill": "Machine Learning"}, {"avgSalary": 186666.66666666666, "change": 16.0, "level": 0.0, "postings": 3, "projected": 65.78359999999999, "reason": "Listed in 3 of 20 postings. Average salary midpoint is $186,667. Trend is +16% over the past 12 months.", "skill": "Kubernetes"}, {"avgSalary": 185000.0, "change": 11.0, "level": 0.0, "postings": 2, "projected": 57.4115884775567, "reason": "Listed in 2 of 20 postings. Average salary midpoint is $185,000. Trend is +11% over the past 12 months.", "skill": "APIs"}, {"avgSalary": 172166.66666666666, "change": 9.0, "level": 0.0, "postings": 3, "projected": 54.17705534474781, "reason": "Listed in 3 of 20 postings. Average salary midpoint is $172,167. Trend is +9% over the past 12 months.", "skill": "Spark"}, {"avgSalary": 185000.0, "change": 6.0, "level": 0.0, "postings": 2, "projected": 53.521680888477555, "reason": "Listed in 2 of 20 postings. Average salary midpoint is $185,000. Trend is +6% over the past 12 months.", "skill": "Docker"}, {"avgSalary": 159166.66666666666, "change": 15.0, "level": 0.0, "postings": 3, "projected": 52.843080055529846, "reason": "Listed in 3 of 20 postings. Average salary midpoint is $159,167. Trend is +15% over the past 12 months.", "skill": "Product Analytics"}, {"avgSalary": 133642.85714285713, "change": 8.0, "level": 2.0, "postings": 7, "projected": 50.74830541416011, "reason": "Listed in 7 of 20 postings. Average salary midpoint is $133,643. Trend is +8% over the past 12 months.", "skill": "Statistics"}, {"avgSalary": 151833.33333333334, "change": 10.0, "level": 0.0, "postings": 3, "projected": 46.056969458584, "reason": "Listed in 3 of 20 postings. Average salary midpoint is $151,833. Trend is +10% over the past 12 months.", "skill": "Experimentation"}, {"avgSalary": 163250.0, "change": 8.0, "level": 0.0, "postings": 2, "projected": 45.908351133734385, "reason": "Listed in 2 of 20 postings. Average salary midpoint is $163,250. Trend is +8% over the past 12 months.", "skill": "Airflow"}, {"avgSalary": 165000.0, "change": 6.0, "level": 0.0, "postings": 1, "projected": 41.984451550208234, "reason": "Listed in 1 of 20 postings. Average salary midpoint is $165,000. Trend is +6% over the past 12 months.", "skill": "Storytelling"}, {"avgSalary": 146500.0, "change": 17.0, "level": 0.0, "postings": 1, "projected": 41.531323785284584, "reason": "Listed in 1 of 20 postings. Average salary midpoint is $146,500. Trend is +17% over the past 12 months.", "skill": "dbt"}, {"avgSalary": 136666.66666666666, "change": 7.0, "level": 0.0, "postings": 3, "projected": 37.56187218880148, "reason": "Listed in 3 of 20 postings. Average salary midpoint is $136,667. Trend is +7% over the past 12 months.", "skill": "Data Modeling"}, {"avgSalary": 150750.0, "change": 3.0, "level": 0.0, "postings": 2, "projected": 37.511437019898196, "reason": "Listed in 2 of 20 postings. Average salary midpoint is $150,750. Trend is +3% over the past 12 months.", "skill": "BI"}, {"avgSalary": 155000.0, "change": 5.0, "level": 0.0, "postings": 1, "projected": 36.855928042572884, "reason": "Listed in 1 of 20 postings. Average salary midpoint is $155,000. Trend is +5% over the past 12 months.", "skill": "Leadership"}, {"avgSalary": 103300.0, "change": 6.0, "level": 2.0, "postings": 5, "projected": 29.865110041647387, "reason": "Listed in 5 of 20 postings. Average salary midpoint is $103,300. Trend is +6% over the past 12 months.", "skill": "Power BI"}, {"avgSalary": 96625.0, "change": -4.0, "level": 4.0, "postings": 4, "projected": 18.048, "reason": "Listed in 4 of 20 postings. Average salary midpoint is $96,625. Trend is -4% over the past 12 months.", "skill": "Excel"}], "syntheticTrends": true, "tableLimit": 10}</script>
+
+  <script>
+  /* @math-start */
+  const Radar = (() => {
+    const MAX = 5;
+    const clamp = (value) => Math.max(0, Math.min(MAX, value));
+    const levelOf = (levels, name) => clamp(levels[name] || 0);
+
+    function gap(skills, levels) {
+      const total = skills.reduce((sum, skill) => sum + skill.projected, 0);
+      if (total === 0) return 0;
+      let missing = 0;
+      for (const skill of skills) {
+        missing += skill.projected * (1 - levelOf(levels, skill.skill) / MAX);
+      }
+      return Math.round((missing / total) * 100 * 10) / 10;
+    }
+
+    function coverage(skills, levels) {
+      return Math.round((100 - gap(skills, levels)) * 10) / 10;
+    }
+
+    function recommendations(skills, levels, limit) {
+      return skills
+        .map((skill) => {
+          const level = levelOf(levels, skill.skill);
+          return { skill: skill.skill, level, contribution: skill.projected * (1 - level / MAX), data: skill };
+        })
+        .filter((rec) => rec.contribution > 0)
+        .sort((a, b) => b.contribution - a.contribution)
+        .slice(0, limit);
+    }
+
+    return { MAX, clamp, gap, coverage, recommendations };
+  })();
+  /* @math-end */
+
+  (function () {
+    'use strict';
+
+    const DATA = JSON.parse(document.getElementById('skill-data').textContent);
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const $ = (id) => document.getElementById(id);
+    const SVG_NS = 'http://www.w3.org/2000/svg';
+    const GEO = { cx: 380, cy: 280, radius: 146 };
+    const LEVEL_LABELS = ['Not started', 'Aware', 'Learning', 'Can apply', 'Proficient', 'Expert'];
+    const RADAR_AXES = 8;
+
+    const skills = DATA.skills;
+    const levels = {};
+    skills.forEach((skill) => { levels[skill.skill] = skill.level; });
+    const radarSkills = skills.slice(0, RADAR_AXES);
+    const tableSkills = skills.slice(0, DATA.tableLimit);
+
+    // Python's round() rounds halves to the nearest even number. Match it so labels agree with the CLI.
+    function roundHalfEven(x) {
+      const floor = Math.floor(x);
+      const diff = x - floor;
+      if (diff > 0.5) return floor + 1;
+      if (diff < 0.5) return floor;
+      return floor % 2 === 0 ? floor : floor + 1;
+    }
+    const levelLabel = (level) => LEVEL_LABELS[Math.max(0, Math.min(LEVEL_LABELS.length - 1, roundHalfEven(level)))];
+    const formatLevel = (level) => String(level);
+    const money = (value) => '$' + Math.round(value).toLocaleString('en-US');
+
+    function headlineFor(recs) {
+      if (!skills.length) return 'No skill data was loaded yet.';
+      const top = skills[0].skill;
+      if (!recs.length) {
+        return top + ' carries the most market value, and your current skills already cover the top opportunities.';
+      }
+      return top + ' carries the most market value. ' + recs[0].skill + ' is your biggest opening.';
+    }
+
+    function bandFor(percent) {
+      if (percent >= 60) return 'Your skills match most of what the market pays for.';
+      if (percent >= 30) return 'Your skills match part of what the market pays for.';
+      return 'Most of the market value here is still ahead of you.';
+    }
+
+    /* ---------- Radar geometry ---------- */
+    function point(index, count, percent) {
+      const angle = -Math.PI / 2 + (2 * Math.PI * index) / count;
+      const distance = GEO.radius * (percent / 100);
+      return [GEO.cx + distance * Math.cos(angle), GEO.cy + distance * Math.sin(angle)];
+    }
+
+    function pointsFor(values) {
+      const count = values.length;
+      return values
+        .map((value, index) => point(index, count, value).map((n) => n.toFixed(1)).join(','))
+        .join(' ');
+    }
+
+    function svgEl(name, attrs) {
+      const el = document.createElementNS(SVG_NS, name);
+      Object.entries(attrs).forEach(([key, value]) => el.setAttribute(key, value));
+      return el;
+    }
+
+    function buildRadarFrame() {
+      const count = radarSkills.length;
+      const rings = $('rings');
+      [25, 50, 75, 100].forEach((ring) => {
+        rings.appendChild(svgEl('polygon', { class: 'ring', points: pointsFor(new Array(count).fill(ring)) }));
+      });
+      const spokes = $('spokes');
+      for (let i = 0; i < count; i++) {
+        const [x, y] = point(i, count, 100);
+        spokes.appendChild(svgEl('line', {
+          class: 'spoke', x1: GEO.cx, y1: GEO.cy, x2: x.toFixed(1), y2: y.toFixed(1),
+        }));
+      }
+      const labels = $('labels');
+      radarSkills.forEach((skill, i) => {
+        const angle = -Math.PI / 2 + (2 * Math.PI * i) / count;
+        const x = GEO.cx + (GEO.radius + 22) * Math.cos(angle);
+        const y = GEO.cy + (GEO.radius + 22) * Math.sin(angle);
+        const cos = Math.cos(angle);
+        const sin = Math.sin(angle);
+        const anchor = cos > 0.2 ? 'start' : cos < -0.2 ? 'end' : 'middle';
+        const baseline = sin > 0.5 ? 'hanging' : sin < -0.5 ? 'auto' : 'middle';
+        const text = svgEl('text', {
+          class: 'radar-label', x: x.toFixed(1), y: y.toFixed(1),
+          'text-anchor': anchor, 'dominant-baseline': baseline,
+        });
+        text.textContent = skill.skill;
+        labels.appendChild(text);
+      });
+    }
+
+    /* ---------- Animation helpers ---------- */
+    const ease = (t) => 1 - Math.pow(1 - t, 3);
+
+    function tween(from, to, duration, onFrame) {
+      if (reduceMotion || duration <= 0) {
+        onFrame(to.slice());
+        return () => {};
+      }
+      let frameId = 0;
+      let start = null;
+      const step = (now) => {
+        if (start === null) start = now;
+        const t = Math.min(1, (now - start) / duration);
+        const e = ease(t);
+        onFrame(from.map((value, i) => value + (to[i] - value) * e));
+        if (t < 1) frameId = requestAnimationFrame(step);
+      };
+      frameId = requestAnimationFrame(step);
+      return () => cancelAnimationFrame(frameId);
+    }
+
+    const shape = { market: radarSkills.map(() => 0), you: radarSkills.map(() => 0) };
+    let cancelShape = () => {};
+    function drawShape() {
+      $('market-shape').setAttribute('points', pointsFor(shape.market));
+      $('you-shape').setAttribute('points', pointsFor(shape.you));
+    }
+    function moveShape(marketTargets, youTargets) {
+      cancelShape();
+      const n = marketTargets.length;
+      const from = shape.market.concat(shape.you);
+      const to = marketTargets.concat(youTargets);
+      cancelShape = tween(from, to, 900, (values) => {
+        shape.market = values.slice(0, n);
+        shape.you = values.slice(n);
+        drawShape();
+      });
+    }
+
+    let displayedCoverage = 0;
+    let cancelCoverage = () => {};
+    function moveCoverage(target) {
+      cancelCoverage();
+      cancelCoverage = tween([displayedCoverage], [target], 900, (values) => {
+        displayedCoverage = values[0];
+        $('coverage').textContent = Math.round(values[0]) + '%';
+      });
+    }
+
+    /* ---------- Learn next list ---------- */
+    const pickElements = new Map();
+
+    function buildPick(name) {
+      const item = document.createElement('li');
+      item.className = 'pick';
+      item.dataset.skill = name;
+      item.innerHTML =
+        '<span class="rank" aria-hidden="true"></span>' +
+        '<div>' +
+          '<h3></h3>' +
+          '<p class="reason"></p>' +
+          '<span class="meter" aria-hidden="true"><span></span></span>' +
+          '<span class="level-note"></span>' +
+        '</div>';
+      return item;
+    }
+
+    function updatePick(item, rec, index, topContribution) {
+      item.querySelector('.rank').textContent = String(index + 1);
+      item.querySelector('h3').textContent = rec.skill;
+      item.querySelector('.reason').textContent = rec.data.reason;
+      const ratio = topContribution > 0 ? Math.min(1, rec.contribution / topContribution) : 0;
+      item.querySelector('.meter > span').style.width = (ratio * 100).toFixed(1) + '%';
+      const levelText = rec.level > 0
+        ? 'You are at ' + formatLevel(rec.level) + ' of 5 (' + levelLabel(rec.level).toLowerCase() + ').'
+        : 'Not on your profile yet.';
+      item.querySelector('.level-note').textContent = 'Opportunity compared with the top pick. ' + levelText;
+    }
+
+    function renderPicks(recs) {
+      const list = $('picks');
+      const before = new Map();
+      for (const item of list.children) {
+        before.set(item.dataset.skill, item.getBoundingClientRect());
+      }
+
+      const keep = new Set(recs.map((rec) => rec.skill));
+      for (const [name, item] of pickElements) {
+        if (!keep.has(name)) {
+          item.remove();
+          pickElements.delete(name);
+        }
+      }
+
+      const top = recs.length ? recs[0].contribution : 0;
+      recs.forEach((rec, index) => {
+        let item = pickElements.get(rec.skill);
+        const isNew = !item;
+        if (isNew) {
+          item = buildPick(rec.skill);
+          pickElements.set(rec.skill, item);
+        }
+        updatePick(item, rec, index, top);
+        list.appendChild(item);
+        if (isNew && !reduceMotion) {
+          item.animate([{ opacity: 0, transform: 'translateY(8px)' }, { opacity: 1, transform: 'none' }],
+            { duration: 420, easing: 'cubic-bezier(0.2, 0.7, 0.2, 1)' });
+        }
+      });
+
+      // FLIP: animate each row from its old position to its new one so re-ranking is visible.
+      if (!reduceMotion) {
+        for (const item of pickElements.values()) {
+          const previous = before.get(item.dataset.skill);
+          if (!previous) continue;
+          const now = item.getBoundingClientRect();
+          const delta = previous.top - now.top;
+          if (Math.abs(delta) > 1) {
+            item.animate([{ transform: 'translateY(' + delta + 'px)' }, { transform: 'none' }],
+              { duration: 480, easing: 'cubic-bezier(0.2, 0.7, 0.2, 1)' });
+          }
+        }
+      }
+
+      $('picks-empty').hidden = recs.length > 0;
+    }
+
+    /* ---------- Levels (sliders) ---------- */
+    function buildLevels() {
+      const container = $('levels');
+      DATA.profile.forEach((name) => {
+        const row = document.createElement('div');
+        row.className = 'level-row';
+        const id = 'level-' + name.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+        const label = document.createElement('label');
+        label.htmlFor = id;
+        label.textContent = name;
+        const output = document.createElement('output');
+        output.htmlFor = id;
+        const input = document.createElement('input');
+        input.type = 'range';
+        input.id = id;
+        input.min = '0';
+        input.max = '5';
+        input.step = '0.5';
+        input.value = String(levels[name] || 0);
+        input.setAttribute('aria-describedby', id + '-note');
+        output.id = id + '-note';
+        const showOutput = () => {
+          const level = Number(input.value);
+          output.textContent = formatLevel(level) + ' of 5 · ' + levelLabel(level);
+        };
+        input.addEventListener('input', () => {
+          levels[name] = Number(input.value);
+          showOutput();
+          render();
+        });
+        showOutput();
+        row.appendChild(label);
+        row.appendChild(output);
+        row.appendChild(input);
+        container.appendChild(row);
+      });
+    }
+
+    /* ---------- Table ---------- */
+    const tableRows = [];
+
+    function buildTable() {
+      const body = $('table-body');
+      const maxValue = Math.max(...tableSkills.map((skill) => skill.projected), 1);
+      tableSkills.forEach((skill) => {
+        const row = document.createElement('tr');
+        row.innerHTML =
+          '<th scope="row"></th>' +
+          '<td><div class="value"><span class="meter"><span></span></span><b></b></div></td>' +
+          '<td class="num"></td>' +
+          '<td class="num"></td>' +
+          '<td class="num"></td>' +
+          '<td><span class="dots" role="img"></span></td>';
+
+        row.querySelector('th').textContent = skill.skill;
+        row.querySelector('.value b').textContent = skill.projected.toFixed(1);
+        const fill = row.querySelector('.meter > span');
+
+        const cells = row.querySelectorAll('td');
+        cells[1].textContent = String(skill.postings);
+        cells[2].textContent = money(skill.avgSalary);
+        const trend = document.createElement('span');
+        trend.className = skill.change >= 0 ? 'up' : 'down';
+        trend.textContent = (skill.change >= 0 ? '+' : '') + skill.change.toFixed(0) + '%';
+        cells[3].appendChild(trend);
+
+        const dotsWrap = cells[4].querySelector('.dots');
+        const dots = [];
+        for (let i = 0; i < 5; i++) {
+          const dot = document.createElement('i');
+          dotsWrap.appendChild(dot);
+          dots.push(dot);
+        }
+
+        body.appendChild(row);
+        tableRows.push({
+          name: skill.skill,
+          dots,
+          dotsWrap,
+          fill,
+          ratio: (skill.projected / maxValue) * 100,
+        });
+      });
+      $('table-caption').textContent = 'Top ' + tableSkills.length + ' skills by projected market value';
+      requestAnimationFrame(() => {
+        tableRows.forEach((row) => { row.fill.style.width = row.ratio.toFixed(1) + '%'; });
+      });
+    }
+
+    function updateTable() {
+      tableRows.forEach((row) => {
+        const level = Radar.clamp(levels[row.name] || 0);
+        const filled = roundHalfEven(level);
+        row.dots.forEach((dot, i) => dot.classList.toggle('on', i < filled));
+        row.dotsWrap.setAttribute('aria-label', 'Level ' + formatLevel(level) + ' of 5, ' + levelLabel(level));
+      });
+    }
+
+    /* ---------- Render ---------- */
+    function render() {
+      const recs = Radar.recommendations(skills, levels, 5);
+      const coverage = Radar.coverage(skills, levels);
+      $('headline').textContent = headlineFor(recs);
+      $('band').textContent = bandFor(coverage);
+      moveCoverage(coverage);
+      moveShape(
+        radarSkills.map((skill) => skill.projected),
+        radarSkills.map((skill) => Radar.clamp(levels[skill.skill] || 0) / Radar.MAX * 100)
+      );
+      renderPicks(recs);
+      updateTable();
+    }
+
+    function init() {
+      $('postings').textContent = String(DATA.postings);
+      $('footnote').textContent =
+        'Built from ' + DATA.postings + ' job postings and your skill levels.' +
+        (DATA.syntheticTrends
+          ? ' The trend figures in the sample data are synthetic demo values. Replace them with real data before you make decisions based on this page.'
+          : '');
+
+      if (!skills.length) {
+        $('headline').textContent = headlineFor([]);
+        $('band').textContent = '';
+        $('picks-empty').hidden = false;
+        return;
+      }
+
+      buildRadarFrame();
+      buildLevels();
+      buildTable();
+      render();
+    }
+
+    init();
+  })();
+  </script>
+</body>
+</html>

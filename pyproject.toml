@@ -4,19 +4,31 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "ai-skill-gap-radar"
-version = "0.1.0"
-description = "Analyze job postings, salary signals, and trends to recommend high-value skills to learn next."
+version = "0.2.0"
+description = "Find the data and AI skills the job market rewards, and see how your profile compares."
 readme = "README.md"
 requires-python = ">=3.10"
-authors = [{ name = "AI Skill Gap Radar" }]
+license = "MIT"
 dependencies = []
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3 :: Only",
+    "Operating System :: OS Independent",
+]
 
 [project.optional-dependencies]
-app = ["plotly>=5.22", "streamlit>=1.36"]
-dev = ["pytest>=8.0"]
+app = ["plotly>=5.22", "streamlit>=1.50"]
+dev = ["pytest>=8.0", "plotly>=5.22", "streamlit>=1.50"]
 
 [project.scripts]
 skill-gap-radar = "skill_gap_radar.cli:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]
+
+[tool.setuptools.package-data]
+skill_gap_radar = ["templates/*.html"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]

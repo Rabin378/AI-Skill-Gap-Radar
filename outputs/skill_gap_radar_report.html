@@ -1,0 +1,175 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Which data and AI skills the job market rewards, and how your profile compares.">
+  <title>Skill Radar</title>
+  <style>
+:root {
+  --paper: #eef1ec;
+  --panel: #f7f9f6;
+  --ink: #1c2630;
+  --muted: #56646c;
+  --rule: #c5cdc8;
+  --market: #1d6b67;
+  --market-soft: #d4e6e3;
+  --you: #b9802a;
+  --you-soft: #efe0c6;
+  --down: #a4492f;
+  --serif: "Charter", "Bitstream Charter", "Iowan Old Style", "Sitka Text", Cambria, Georgia, serif;
+  --sans: "Avenir Next", "Helvetica Neue", "Segoe UI", system-ui, -apple-system, sans-serif;
+}
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font: 17px/1.6 var(--sans);
+}
+.page { max-width: 1120px; margin: 0 auto; padding: 56px 24px 72px; }
+a { color: var(--market); }
+:focus-visible { outline: 2px solid var(--market); outline-offset: 3px; border-radius: 2px; }
+
+.hero {
+  display: grid;
+  grid-template-columns: minmax(0, 0.92fr) minmax(0, 1.08fr);
+  gap: 40px;
+  align-items: center;
+}
+.hero h1 {
+  font: 700 clamp(36px, 5vw, 56px)/1.08 var(--serif);
+  letter-spacing: -0.015em;
+  margin: 0 0 20px;
+}
+.lede { font-size: 19px; color: var(--muted); max-width: 34em; margin: 0 0 16px; }
+.answer { font-size: 19px; margin: 0 0 12px; max-width: 34em; }
+.answer strong { font-weight: 700; color: var(--market); }
+
+.radar { margin: 0; }
+.radar svg { width: 100%; height: auto; display: block; }
+.radar figcaption { font-size: 14px; color: var(--muted); margin-top: 8px; }
+.radar-label { font: 500 20px var(--sans); fill: var(--ink); }
+.key { display: inline-flex; align-items: center; gap: 8px; margin-right: 18px; }
+.swatch { width: 18px; height: 4px; border-radius: 2px; display: inline-block; }
+
+section { margin-top: 72px; padding-top: 28px; border-top: 1px solid var(--rule); }
+h2 { font: 600 30px/1.2 var(--serif); margin: 0 0 8px; letter-spacing: -0.01em; }
+.section-intro { color: var(--muted); max-width: 40em; margin: 0 0 28px; }
+
+.picks { list-style: none; margin: 0; padding: 0; }
+.picks li {
+  display: grid;
+  grid-template-columns: 56px minmax(0, 1fr);
+  gap: 8px 16px;
+  padding: 26px 0;
+  border-top: 1px solid var(--rule);
+}
+.picks li:first-child { border-top: 0; padding-top: 0; }
+.rank { font: 500 34px/1 var(--serif); color: var(--muted); }
+.pick-name { font: 600 24px/1.2 var(--serif); margin: 0 0 6px; }
+.pick-reason { margin: 0 0 14px; color: var(--muted); font-size: 16px; }
+.meter { display: block; height: 6px; border-radius: 999px; background: var(--market-soft); overflow: hidden; max-width: 360px; }
+.meter span { display: block; height: 100%; background: var(--market); }
+.meter-label { font-size: 14px; color: var(--muted); margin-top: 6px; }
+.level-note { font-size: 14px; color: var(--muted); margin: 6px 0 0; }
+
+.table-wrap { overflow-x: auto; border-top: 1px solid var(--rule); }
+table { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; min-width: 680px; }
+caption { text-align: left; color: var(--muted); padding: 14px 0 10px; font-size: 14px; }
+th, td { padding: 14px 12px 14px 0; border-bottom: 1px solid var(--rule); text-align: left; vertical-align: middle; }
+th { font-size: 14px; font-weight: 600; color: var(--muted); }
+th.num, td.num { text-align: right; padding-right: 16px; }
+.value { display: flex; align-items: center; gap: 12px; }
+.value .meter { width: 150px; flex: 0 0 150px; }
+.value b { font-weight: 600; min-width: 3.2em; }
+.trend-up { color: var(--market); font-weight: 600; }
+.trend-down { color: var(--down); font-weight: 600; }
+.dots { display: inline-flex; gap: 4px; vertical-align: middle; }
+.dots i { width: 10px; height: 10px; border-radius: 50%; border: 1.5px solid var(--you); display: inline-block; }
+.dots i.on { background: var(--you); }
+
+.reading { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 40px 56px; }
+.reading h3 { font: 600 19px/1.3 var(--serif); margin: 0 0 8px; }
+.reading p { margin: 0; color: var(--muted); font-size: 16px; }
+.levels { margin: 14px 0 0; padding: 0; list-style: none; font-size: 16px; color: var(--muted); }
+.levels li { padding: 6px 0; border-top: 1px solid var(--rule); display: flex; gap: 12px; }
+.levels li b { min-width: 1.2em; color: var(--ink); font-weight: 600; }
+
+.footnote { margin-top: 64px; padding-top: 22px; border-top: 1px solid var(--rule); font-size: 14px; color: var(--muted); }
+
+@media (max-width: 860px) {
+  .hero { grid-template-columns: 1fr; gap: 36px; }
+  .reading { grid-template-columns: 1fr; }
+}
+@media (max-width: 520px) {
+  .page { padding: 36px 18px 56px; }
+  .radar-label { font-size: 24px; }
+  .hero h1 { font-size: 34px; }
+  .rank { font-size: 26px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; animation: none !important; }
+}
+</style>
+</head>
+<body>
+  <main class="page">
+    <header class="hero">
+      <div>
+        <h1>Python carries the most market value. LLM is your biggest opening.</h1>
+        <p class="answer">Your current skills cover about 17% of the market value in these 20 postings. Most of the market value here is still ahead of you.</p>
+        <p class="lede">This report ranks skills by how much the postings pay for them, and points to the gaps worth closing first.</p>
+      </div>
+      <figure class="radar">
+        <svg viewBox="0 0 760 560" role="img" aria-labelledby="radar-title radar-desc"><title id="radar-title">Market value compared with your skill levels</title><desc id="radar-desc">Radar chart of the top 8 skills by market value. The teal shape is market value. The amber shape is your level.</desc><polygon points="380.0,243.5 405.8,254.2 416.5,280.0 405.8,305.8 380.0,316.5 354.2,305.8 343.5,280.0 354.2,254.2" fill="none" stroke="#c5cdc8" stroke-width="1"/><polygon points="380.0,207.0 431.6,228.4 453.0,280.0 431.6,331.6 380.0,353.0 328.4,331.6 307.0,280.0 328.4,228.4" fill="none" stroke="#c5cdc8" stroke-width="1"/><polygon points="380.0,170.5 457.4,202.6 489.5,280.0 457.4,357.4 380.0,389.5 302.6,357.4 270.5,280.0 302.6,202.6" fill="none" stroke="#c5cdc8" stroke-width="1"/><polygon points="380.0,134.0 483.2,176.8 526.0,280.0 483.2,383.2 380.0,426.0 276.8,383.2 234.0,280.0 276.8,176.8" fill="none" stroke="#c5cdc8" stroke-width="1"/><line x1="380.0" y1="280.0" x2="380.0" y2="134.0" stroke="#c5cdc8" stroke-width="1"/><line x1="380.0" y1="280.0" x2="483.2" y2="176.8" stroke="#c5cdc8" stroke-width="1"/><line x1="380.0" y1="280.0" x2="526.0" y2="280.0" stroke="#c5cdc8" stroke-width="1"/><line x1="380.0" y1="280.0" x2="483.2" y2="383.2" stroke="#c5cdc8" stroke-width="1"/><line x1="380.0" y1="280.0" x2="380.0" y2="426.0" stroke="#c5cdc8" stroke-width="1"/><line x1="380.0" y1="280.0" x2="276.8" y2="383.2" stroke="#c5cdc8" stroke-width="1"/><line x1="380.0" y1="280.0" x2="234.0" y2="280.0" stroke="#c5cdc8" stroke-width="1"/><line x1="380.0" y1="280.0" x2="276.8" y2="176.8" stroke="#c5cdc8" stroke-width="1"/><polygon points="380.0,138.1 462.5,197.5 496.0,280.0 457.5,357.5 380.0,387.1 306.7,353.3 277.8,280.0 312.1,212.1" fill="#1d6b67" fill-opacity="0.16" stroke="#1d6b67" stroke-width="2.5" stroke-linejoin="round"/><polygon points="380.0,163.2 400.6,259.4 467.6,280.0 380.0,280.0 380.0,280.0 380.0,280.0 350.8,280.0 380.0,280.0" fill="#b9802a" fill-opacity="0.18" stroke="#b9802a" stroke-width="2" stroke-dasharray="6 5" stroke-linejoin="round"/><text class="radar-label" x="380.0" y="112.0" text-anchor="middle" dominant-baseline="auto">Python</text><text class="radar-label" x="498.8" y="161.2" text-anchor="start" dominant-baseline="auto">GenAI</text><text class="radar-label" x="548.0" y="280.0" text-anchor="start" dominant-baseline="middle">SQL</text><text class="radar-label" x="498.8" y="398.8" text-anchor="start" dominant-baseline="hanging">LLM</text><text class="radar-label" x="380.0" y="448.0" text-anchor="middle" dominant-baseline="hanging">MLOps</text><text class="radar-label" x="261.2" y="398.8" text-anchor="end" dominant-baseline="hanging">Cloud</text><text class="radar-label" x="212.0" y="280.0" text-anchor="end" dominant-baseline="middle">Machine Learning</text><text class="radar-label" x="261.2" y="161.2" text-anchor="end" dominant-baseline="auto">Kubernetes</text></svg>
+        <figcaption>
+          <span class="key"><span class="swatch" style="background:#1d6b67"></span>Market value</span>
+          <span class="key"><span class="swatch" style="background:#b9802a"></span>Your level</span>
+        </figcaption>
+      </figure>
+    </header>
+
+    <section aria-labelledby="picks-heading">
+      <h2 id="picks-heading">Learn next</h2>
+      <p class="section-intro">The skills that would unlock the most market value for your current profile, in order.</p>
+      <ol class="picks"><li><span class="rank">1</span><div><h3 class="pick-name">LLM</h3><p class="pick-reason">Listed in 3 of 20 postings. Average salary midpoint is $175,833. Trend is +31% over the past 12 months.</p><span class="meter" aria-hidden="true"><span style="width: 100.0%"></span></span><p class="meter-label">Opportunity, relative to the top pick. Not on your profile yet.</p></div></li><li><span class="rank">2</span><div><h3 class="pick-name">MLOps</h3><p class="pick-reason">Listed in 3 of 20 postings. Average salary midpoint is $186,667. Trend is +24% over the past 12 months.</p><span class="meter" aria-hidden="true"><span style="width: 97.7%"></span></span><p class="meter-label">Opportunity, relative to the top pick. Not on your profile yet.</p></div></li><li><span class="rank">3</span><div><h3 class="pick-name">Cloud</h3><p class="pick-reason">Listed in 5 of 20 postings. Average salary midpoint is $173,800. Trend is +20% over the past 12 months.</p><span class="meter" aria-hidden="true"><span style="width: 94.7%"></span></span><p class="meter-label">Opportunity, relative to the top pick. Not on your profile yet.</p></div></li><li><span class="rank">4</span><div><h3 class="pick-name">Kubernetes</h3><p class="pick-reason">Listed in 3 of 20 postings. Average salary midpoint is $186,667. Trend is +16% over the past 12 months.</p><span class="meter" aria-hidden="true"><span style="width: 87.7%"></span></span><p class="meter-label">Opportunity, relative to the top pick. Not on your profile yet.</p></div></li><li><span class="rank">5</span><div><h3 class="pick-name">GenAI</h3><p class="pick-reason">Listed in 5 of 20 postings. Average salary midpoint is $164,500. Trend is +34% over the past 12 months.</p><span class="meter" aria-hidden="true"><span style="width: 85.2%"></span></span><p class="meter-label">Opportunity, relative to the top pick. You are at 1 of 5 (aware).</p></div></li><li><span class="rank">6</span><div><h3 class="pick-name">APIs</h3><p class="pick-reason">Listed in 2 of 20 postings. Average salary midpoint is $185,000. Trend is +11% over the past 12 months.</p><span class="meter" aria-hidden="true"><span style="width: 76.5%"></span></span><p class="meter-label">Opportunity, relative to the top pick. Not on your profile yet.</p></div></li><li><span class="rank">7</span><div><h3 class="pick-name">Machine Learning</h3><p class="pick-reason">Listed in 6 of 20 postings. Average salary midpoint is $165,667. Trend is +18% over the past 12 months.</p><span class="meter" aria-hidden="true"><span style="width: 74.6%"></span></span><p class="meter-label">Opportunity, relative to the top pick. You are at 1 of 5 (aware).</p></div></li><li><span class="rank">8</span><div><h3 class="pick-name">Spark</h3><p class="pick-reason">Listed in 3 of 20 postings. Average salary midpoint is $172,167. Trend is +9% over the past 12 months.</p><span class="meter" aria-hidden="true"><span style="width: 72.2%"></span></span><p class="meter-label">Opportunity, relative to the top pick. Not on your profile yet.</p></div></li><li><span class="rank">9</span><div><h3 class="pick-name">Docker</h3><p class="pick-reason">Listed in 2 of 20 postings. Average salary midpoint is $185,000. Trend is +6% over the past 12 months.</p><span class="meter" aria-hidden="true"><span style="width: 71.3%"></span></span><p class="meter-label">Opportunity, relative to the top pick. Not on your profile yet.</p></div></li><li><span class="rank">10</span><div><h3 class="pick-name">Product Analytics</h3><p class="pick-reason">Listed in 3 of 20 postings. Average salary midpoint is $159,167. Trend is +15% over the past 12 months.</p><span class="meter" aria-hidden="true"><span style="width: 70.4%"></span></span><p class="meter-label">Opportunity, relative to the top pick. Not on your profile yet.</p></div></li></ol>
+    </section>
+
+    <section aria-labelledby="market-heading">
+      <h2 id="market-heading">Where the market value is</h2>
+      <p class="section-intro">Leaders include Python, GenAI, SQL. Scroll sideways on small screens to see every column.</p>
+      <div class="table-wrap" tabindex="0"><table><caption>Top 10 skills by projected market value</caption><thead><tr><th scope="col">Skill</th><th scope="col">Market value</th><th scope="col" class="num">Postings</th><th scope="col" class="num">Average salary</th><th scope="col" class="num">Past 12 months</th><th scope="col">Your level</th></tr></thead><tbody><tr><th scope="row">Python</th><td><div class="value"><span class="meter" aria-hidden="true"><span style="width: 97.2%"></span></span><b>97.2</b></div></td><td class="num">15</td><td class="num">$164,133</td><td class="num"><span class="trend-up">+14%</span></td><td><span class="dots" role="img" aria-label="Level 4 of 5, Proficient"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class=""></i></span></td></tr><tr><th scope="row">GenAI</th><td><div class="value"><span class="meter" aria-hidden="true"><span style="width: 79.9%"></span></span><b>79.9</b></div></td><td class="num">5</td><td class="num">$164,500</td><td class="num"><span class="trend-up">+34%</span></td><td><span class="dots" role="img" aria-label="Level 1 of 5, Aware"><i class="on"></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i></span></td></tr><tr><th scope="row">SQL</th><td><div class="value"><span class="meter" aria-hidden="true"><span style="width: 79.4%"></span></span><b>79.4</b></div></td><td class="num">14</td><td class="num">$137,107</td><td class="num"><span class="trend-up">+12%</span></td><td><span class="dots" role="img" aria-label="Level 3 of 5, Can apply"><i class="on"></i><i class="on"></i><i class="on"></i><i class=""></i><i class=""></i></span></td></tr><tr><th scope="row">LLM</th><td><div class="value"><span class="meter" aria-hidden="true"><span style="width: 75.0%"></span></span><b>75.0</b></div></td><td class="num">3</td><td class="num">$175,833</td><td class="num"><span class="trend-up">+31%</span></td><td><span class="dots" role="img" aria-label="Level 0 of 5, Not started"><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i></span></td></tr><tr><th scope="row">MLOps</th><td><div class="value"><span class="meter" aria-hidden="true"><span style="width: 73.3%"></span></span><b>73.3</b></div></td><td class="num">3</td><td class="num">$186,667</td><td class="num"><span class="trend-up">+24%</span></td><td><span class="dots" role="img" aria-label="Level 0 of 5, Not started"><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i></span></td></tr><tr><th scope="row">Cloud</th><td><div class="value"><span class="meter" aria-hidden="true"><span style="width: 71.0%"></span></span><b>71.0</b></div></td><td class="num">5</td><td class="num">$173,800</td><td class="num"><span class="trend-up">+20%</span></td><td><span class="dots" role="img" aria-label="Level 0 of 5, Not started"><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i></span></td></tr><tr><th scope="row">Machine Learning</th><td><div class="value"><span class="meter" aria-hidden="true"><span style="width: 70.0%"></span></span><b>70.0</b></div></td><td class="num">6</td><td class="num">$165,667</td><td class="num"><span class="trend-up">+18%</span></td><td><span class="dots" role="img" aria-label="Level 1 of 5, Aware"><i class="on"></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i></span></td></tr><tr><th scope="row">Kubernetes</th><td><div class="value"><span class="meter" aria-hidden="true"><span style="width: 65.8%"></span></span><b>65.8</b></div></td><td class="num">3</td><td class="num">$186,667</td><td class="num"><span class="trend-up">+16%</span></td><td><span class="dots" role="img" aria-label="Level 0 of 5, Not started"><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i></span></td></tr><tr><th scope="row">APIs</th><td><div class="value"><span class="meter" aria-hidden="true"><span style="width: 57.4%"></span></span><b>57.4</b></div></td><td class="num">2</td><td class="num">$185,000</td><td class="num"><span class="trend-up">+11%</span></td><td><span class="dots" role="img" aria-label="Level 0 of 5, Not started"><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i></span></td></tr><tr><th scope="row">Spark</th><td><div class="value"><span class="meter" aria-hidden="true"><span style="width: 54.2%"></span></span><b>54.2</b></div></td><td class="num">3</td><td class="num">$172,167</td><td class="num"><span class="trend-up">+9%</span></td><td><span class="dots" role="img" aria-label="Level 0 of 5, Not started"><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i></span></td></tr></tbody></table></div>
+    </section>
+
+    <section aria-labelledby="reading-heading">
+      <h2 id="reading-heading">How to read this</h2>
+      <p class="section-intro">The numbers come from three signals. Each one is explained below.</p>
+      <div class="reading">
+        <div>
+          <h3>Market value</h3>
+          <p>A 0 to 100 score. It blends demand, salary, and growth, then adjusts for the 12-month change. Higher means the market pays more for the skill right now.</p>
+        </div>
+        <div>
+          <h3>Your level</h3>
+          <p>Your own rating from 0 to 5, taken from your skill file. The dots show the level and the amber outline marks what you have not reached yet.</p>
+          <ul class="levels"><li><b>0</b><span>Not started</span></li><li><b>1</b><span>Aware of it and what it is for</span></li><li><b>2</b><span>Learning through courses or small projects</span></li><li><b>3</b><span>Can apply it to real work with some help</span></li><li><b>4</b><span>Works with it independently</span></li><li><b>5</b><span>Teaches it or leads decisions about it</span></li></ul>
+        </div>
+        <div>
+          <h3>Coverage and gap</h3>
+          <p>Coverage is the share of market value your levels already reach. The gap is the rest. A gap of 83.4% means 83.4 of every 100 points of market value are still open to you.</p>
+        </div>
+        <div>
+          <h3>What drives the score</h3>
+          <p>Demand counts how often a skill appears. Salary uses the midpoint of posted ranges. Growth uses the trend index and the 12-month change. Each signal is scaled to 0 to 100 before it is combined.</p>
+        </div>
+      </div>
+    </section>
+
+    <footer class="footnote">
+      Built from 20 job postings, a trend signal file, and your skill levels. The trend figures in the sample data are synthetic demo values. Replace <code>data/technology_trends.csv</code> with real data before you make decisions based on this report.
+    </footer>
+  </main>
+</body>
+</html>

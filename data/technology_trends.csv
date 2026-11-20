@@ -1,0 +1,23 @@
+skill,trend_index,change_12m_pct,source_note
+GenAI,94,34,Synthetic portfolio demo signal
+LLM,92,31,Synthetic portfolio demo signal
+Python,88,14,Synthetic portfolio demo signal
+SQL,84,12,Synthetic portfolio demo signal
+Machine Learning,86,18,Synthetic portfolio demo signal
+MLOps,82,24,Synthetic portfolio demo signal
+Cloud,80,20,Synthetic portfolio demo signal
+Spark,72,9,Synthetic portfolio demo signal
+Statistics,76,8,Synthetic portfolio demo signal
+Power BI,70,6,Synthetic portfolio demo signal
+Data Modeling,68,7,Synthetic portfolio demo signal
+Product Analytics,74,15,Synthetic portfolio demo signal
+Experimentation,71,10,Synthetic portfolio demo signal
+Airflow,67,8,Synthetic portfolio demo signal
+Docker,66,6,Synthetic portfolio demo signal
+Kubernetes,73,16,Synthetic portfolio demo signal
+Excel,52,-4,Synthetic portfolio demo signal
+BI,64,3,Synthetic portfolio demo signal
+APIs,69,11,Synthetic portfolio demo signal
+Leadership,61,5,Synthetic portfolio demo signal
+Storytelling,65,6,Synthetic portfolio demo signal
+dbt,75,17,Synthetic portfolio demo signal
