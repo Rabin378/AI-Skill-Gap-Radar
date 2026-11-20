@@ -1,105 +1,153 @@
-# AI Skill Gap Radar
+# Skill Radar
 
-AI Skill Gap Radar is a Python project that analyzes job postings, required skills, salaries, and technology trend signals to estimate which skills are becoming more valuable. It also compares market demand against a user's current skill profile and recommends what to learn next.
+Skill Radar shows which data and AI skills job postings reward most, and how your own skill levels compare. It then recommends what to learn next, in order of how much market value each skill would unlock for you.
 
-## What It Does
+It comes in four forms:
 
-- Ranks skills by demand, salary signal, and trend growth.
-- Calculates a personalized skill gap score.
-- Recommends high-value next skills to learn.
-- Runs as both a command-line tool and a Streamlit dashboard.
-- Uses simple CSV inputs so you can replace the sample data with real job-posting exports.
+- **A command-line tool** for a quick answer in the terminal.
+- **A standalone HTML report** you can open in any browser, share, or print. It needs no server or internet connection.
+- **An animated, interactive page** (one self-contained HTML file). Move the sliders to set your levels and watch coverage, the radar, and the learn-next list update.
+- **An interactive dashboard** built with Streamlit, for exploring the data in a Python environment.
 
-## Project Structure
+All four read the same CSV files and use the same scoring, so they always agree.
 
-```text
-.
-├── data/
-│   ├── sample_job_postings.csv
-│   ├── technology_trends.csv
-│   └── user_skills.csv
-├── src/
-│   └── skill_gap_radar/
-│       ├── analytics.py
-│       ├── app.py
-│       ├── cli.py
-│       ├── data_loader.py
-│       └── models.py
-├── tests/
-│   └── test_analytics.py
-├── pyproject.toml
-└── requirements.txt
-```
+## Quick start
 
-## Quick Start
+You need Python 3.10 or newer.
 
 ```bash
 python3 -m venv .venv
-source .venv/bin/activate
-pip install -r requirements.txt
-pip install -e .
+source .venv/bin/activate        # Windows: .venv\Scripts\activate
+pip install -e ".[dev]"
 ```
 
-Run the CLI:
+Then pick how you want to see the results:
 
 ```bash
-skill-gap-radar analyze
+skill-gap-radar analyze                  # summary in the terminal
+skill-gap-radar report                   # writes outputs/skill_gap_radar_report.html
+skill-gap-radar page                     # writes outputs/skill_radar.html (animated, interactive)
+streamlit run src/skill_gap_radar/app.py # interactive dashboard at http://localhost:8501
 ```
 
-Run the dashboard:
+Run the commands from the project root so the default paths resolve.
 
-```bash
-streamlit run src/skill_gap_radar/app.py
+## What you will see
+
+- **A headline** that names the strongest skill in the market and your best next move.
+- **A coverage figure** showing how much of the market value your current skills already reach.
+- **A radar chart** that compares market value (teal) with your own levels (amber) for the top skills.
+- **A learn-next list** of the skills that would add the most value, each with the reason it ranks there.
+- **A full table** of skills with demand, salary, growth, and your level.
+
+## Screenshots
+
+**Standalone report** (`skill-gap-radar report`):
+
+![Skill Radar report on desktop](docs/screenshots/report-desktop.png)
+
+**Animated page** (`skill-gap-radar page`):
+
+![Animated Skill Radar page](docs/screenshots/animated-page.png)
+
+**Dashboard** (`streamlit run src/skill_gap_radar/app.py`):
+
+![Skill Radar dashboard](docs/screenshots/dashboard.png)
+
+## Using your own data
+
+Replace the files in `data/` with your own exports. Every file must include the columns listed below. Column names are case-sensitive. Files saved from Excel with a UTF-8 byte-order mark are fine.
+
+**`sample_job_postings.csv`**: one row per posting.
+
+| Column | Example | Notes |
+| --- | --- | --- |
+| `job_id` | `1` | Any unique value |
+| `title` | `Data Scientist` | |
+| `company` | `Northstar Analytics` | |
+| `location` | `Remote` | Not used in scoring yet |
+| `posted_date` | `2026-09-10` | `YYYY-MM-DD`. Validated, not yet used in scoring |
+| `salary_min` | `118000` | Yearly, in your currency |
+| `salary_max` | `155000` | Must be at least `salary_min` |
+| `skills` | `Python;SQL;Statistics` | Semicolon-separated |
+
+**`technology_trends.csv`**: one row per skill.
+
+| Column | Example | Notes |
+| --- | --- | --- |
+| `skill` | `GenAI` | Skills missing from this file get neutral growth values |
+| `trend_index` | `94` | 0 to 100 |
+| `change_12m_pct` | `34` | Percent change over the last 12 months |
+| `source_note` | `Industry survey, Q3` | Free text, kept for your records |
+
+**`user_skills.csv`**: your current levels.
+
+| Column | Example | Notes |
+| --- | --- | --- |
+| `skill` | `Python` | |
+| `level` | `4` | 0 (not started) to 5 (expert). Values outside the range are clamped |
+
+If a file is missing a column or a value cannot be read, Skill Radar stops and names the file and line number.
+
+## How the score works
+
+Each skill gets three signals, each scaled to 0 to 100 and combined:
+
+| Signal | Weight | What it measures |
+| --- | --- | --- |
+| Demand | 45% | How often postings list the skill |
+| Salary | 35% | The average salary midpoint of postings that list it |
+| Growth | 20% | The trend index and the 12-month change |
+
+**Market value** is the blend, adjusted by the 12-month change. **Coverage** is the share of market value your levels already reach. **Gap** is the rest. A higher gap means more opportunity to learn. Full formulas, worked examples, and known limits are in [docs/methodology.md](docs/methodology.md).
+
+## Project layout
+
+```text
+.
+├── data/                       Input CSV files
+├── docs/
+│   ├── methodology.md         How the scores are calculated
+│   └── screenshots/            Images used in this README
+├── outputs/                    Generated reports (created by `skill-gap-radar report`)
+├── src/skill_gap_radar/
+│   ├── analytics.py            Scoring, gap, and recommendations
+│   ├── app.py                  Streamlit dashboard
+│   ├── animated_page.py        Builds the animated, interactive page
+│   ├── cli.py                  Command-line interface
+│   ├── data_loader.py          CSV loading and validation
+│   ├── insights.py             Plain-language wording shared across outputs
+│   ├── models.py               Data classes
+│   ├── report.py               Standalone HTML report
+│   └── templates/
+│       └── animated_page.html  Page template (layout, styles, and script)
+├── tests/                      Unit and smoke tests
+├── .streamlit/config.toml      Dashboard theme
+└── pyproject.toml
 ```
 
-Run tests:
+## Running the tests
 
 ```bash
 pytest
 ```
 
-## Input CSV Format
+The suite covers the scoring rules, data validation, the HTML report and animated page (including escaping and that the page makes no network requests), the CLI, and a headless run of the dashboard.
 
-`data/sample_job_postings.csv`
+## Limits to keep in mind
 
-```csv
-job_id,title,company,location,posted_date,salary_min,salary_max,skills
-1,Data Scientist,Northstar Analytics,Remote,2026-09-10,118000,155000,"Python;SQL;Machine Learning;Statistics"
-```
+- The included trend figures are **synthetic demo values**. Replace them with real data before you make career or hiring decisions.
+- The sample postings are illustrative. Results are only as broad as the postings you feed in.
+- Posting dates are checked but do not yet affect the score. Recent postings currently count the same as older ones.
 
-`data/technology_trends.csv`
+## Roadmap
 
-```csv
-skill,trend_index,change_12m_pct,source_note
-GenAI,94,34,Synthetic market signal
-```
+- Weight recent postings more heavily, using `posted_date`.
+- Normalize salaries by location and currency.
+- Track changes month by month to show trends over time.
+- Group related skills with embeddings.
+- Read a resume to fill in your skill levels automatically.
 
-`data/user_skills.csv`
+## License
 
-```csv
-skill,level
-Python,4
-SQL,3
-```
-
-Skill level is from `0` to `5`.
-
-## How The Score Works
-
-Each skill receives a value score from three market signals:
-
-- Demand: how often the skill appears in job postings.
-- Salary: average salary midpoint for postings requiring that skill.
-- Growth: external trend signal and 12-month change.
-
-The personalized gap score estimates how much high-value demand is not covered by the user's current skill levels. A higher score means a larger learning opportunity.
-
-## Portfolio Ideas
-
-Good next upgrades for this project:
-
-- Add a job scraper for sources that allow scraping or provide APIs.
-- Add salary normalization by location.
-- Add time-series forecasting by month.
-- Add embeddings to cluster related skills.
-- Add resume parsing to infer the user's current skill vector automatically.
+MIT. See [LICENSE](LICENSE).
